@@ -35,7 +35,7 @@ router.get('/login',async(req,res)=>{
             })
         }
 
-        let token=await jwt.sign({user:user},process.env.HASHSECRET)
+        let token=await jwt.sign({userID:user._id,userEmail:user.email,userRole:role},process.env.HASHSECRET)
 
         return res.status(200).json({
             msg:"success",
@@ -53,9 +53,48 @@ router.get('/login',async(req,res)=>{
 })
 
 
-router.get('/signup',async(req,res)=>{
+router.post('/signup',async(req,res)=>{
     try {
-                
+        const user=new User(req.body)
+        await user.save()
+        
+        let token=await jwt.sign({userID:user._id,userEmail:user.email,userRole:user.role},process.env.HASHSECRET)
+
+        return res.status(200).json({
+            msg:"success",
+            user:user,
+            token:token
+        })     
+    } catch (err) {
+        console.log(err.message)
+        return res.status(400).json({
+            msg:"Error",
+            error:err.message
+        })
+    }
+})
+
+router.get('/forgetPassword',async(req,res)=>{
+    try {
+        const email=req.query.email
+
+        const user=await User.findOne({email:email})
+        if(!user){
+            return res.status(400).json({
+                msg:"error",
+                error:"User with this email does not exists."
+            })
+        }
+
+        let newPass='123456'
+        user.password=newPass
+        await user.save()
+        
+        return res.status(200).json({
+            msg:"success",
+            password:newPass,
+        })
+        
     } catch (err) {
         console.log(err.message)
         return res.status(400).json({

@@ -20,7 +20,7 @@ module.exports = async(req,res,next)=>{
         req.decodedToken=decodedToken
         req.userID=decodedToken.userID
         req.userEmail=decodedToken.userEmail
-        req.status=decodedToken.status
+        req.userRole=decodedToken.userRole
         req.isAuth=true
         next()
     } catch (e) {
