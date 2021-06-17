@@ -55,6 +55,12 @@ router.get('/login',async(req,res)=>{
 
 router.post('/signup',async(req,res)=>{
     try {
+        if(req.body.role == "customer" || req.body.role == "vendor"){
+            return res.status(400).json({
+                msg:"error",
+                error:"Invalid Role."
+            }) 
+        }
         const user=new User(req.body)
         await user.save()
         

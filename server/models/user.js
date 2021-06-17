@@ -27,7 +27,16 @@ const userSchema = new mongoose.Schema({
     },
     avatar: {
         type: String
+    },
+    debit:{
+        type:Number,
+        default:0
+    },
+    credit:{
+        type:Number,
+        default:0
     }
+    
 }, {
     timestamps: true
 })
