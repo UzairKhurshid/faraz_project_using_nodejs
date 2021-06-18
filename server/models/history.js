@@ -6,27 +6,45 @@ const historySchema = new mongoose.Schema({
         type: String,
         ref:'Product'
     },
-    quantity: {
-        type: Number
-    },
-    //type ==> purchase/sale
-    type:{
-        type:String
-    },
-    //purchaseUnitPrice when type=purchase
-    purchaseUnitPrice:{
-        type:Number
-    },
-    //saleUnitPrice when type=sale
-    saleUnitPrice:{
-        type:Number
-    },
-    totalPrice:{
-        type:String
-    },
     userID:{
         type:String,
         ref:"User"
+    },
+     //type ==> purchase/sale
+    type:{
+        type:String,
+        required:true
+    },
+    quantity: {
+        type: Number,
+    },
+    totalPrice:{
+        type:String,
+    },
+    discount:{
+        type:Number,
+        default:0,
+    },
+    
+    //purchaseUnitPrice when type=purchase
+    purchaseUnitPrice:{
+        type:Number,
+    },
+    //saleUnitPrice when type=sale
+    saleUnitPrice:{
+        type:Number,
+    },
+    date:{
+        type:String,
+        required:true
+    },
+    cash:{
+        type:Number,
+        default:0
+    },
+    debit:{
+        type:Number,
+        default:0
     }
     
 },{timestamps:true})
