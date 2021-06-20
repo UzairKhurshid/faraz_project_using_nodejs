@@ -138,23 +138,6 @@ router.post('/payment',auth,async(req,res)=>{
 
 
 
-router.post('/purchaseReturn',auth,async(req,res)=>{
-    try{
-        let historyID=req.body.historyID
-        let account=await Account.findOne()
-        let stock=await Stock.find()
-        let vendor=await Vendor.find()
-        
-        
-
-    }catch(err){
-        console.log(err.message)
-        return res.status(400).json({
-            msg:"error",
-            error:err.message
-        })
-    }
-})
 
 
 module.exports=router

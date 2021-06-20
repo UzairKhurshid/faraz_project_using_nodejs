@@ -28,6 +28,7 @@ const productRoute = require('./routes/products')
 const stockRoute = require('./routes/stock')
 const accountRoute = require('./routes/account')
 const paymentRoute = require('./routes/payments')
+const purchaseSaleReturnRoute = require('./routes/purchaseSaleReturn')
 const profileRoute = require('./routes/profile')
 
 
@@ -37,6 +38,7 @@ app.use(productRoute)
 app.use(stockRoute)
 app.use(accountRoute)
 app.use(paymentRoute)
+app.use(purchaseSaleReturnRoute)
 app.use(profileRoute)
 
 

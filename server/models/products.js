@@ -16,7 +16,7 @@ const productSchema = new mongoose.Schema({
         type:Number
     },
     saleUnitPrice:{
-        type:String
+        type:Number
     },
     avatar:{
         type:String
