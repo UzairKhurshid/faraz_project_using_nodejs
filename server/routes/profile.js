@@ -1,9 +1,22 @@
 const express=require('express')
 const mongoose=require('mongoose')
+const path=require('path')
+const multer=require('multer')
 const auth=require('../auth/index')
 const User=require('../models/user')
 const router=new express.Router()
 
+// SET STORAGE
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, path.join(__dirname,'../../public/images/userProfileImages/'))
+    },
+    filename: function (req, file, cb) {
+      cb(null, 'avatar'+req.userID+file.fieldname + '-' + Date.now()+'.png')
+    }
+  })
+   
+  var upload = multer({ storage: storage })
 
 router.post('/updateProfile',auth,async(req,res)=>{
     try {
@@ -45,7 +58,7 @@ router.post('/updateProfile',auth,async(req,res)=>{
 })
 
 
-router.post('/updateProfileImage',auth,async(req,res)=>{
+router.post('/updateProfileImage',upload.single('avatar'),auth,async(req,res)=>{
     try{
         let userID=req.userID
         let user=await User.findById({_id:mongoose.Types.ObjectId(userID)})
@@ -55,9 +68,20 @@ router.post('/updateProfileImage',auth,async(req,res)=>{
                 error:"User not found"
             })
         }
+        const file = req.file
+        if (!file) {
+            return res.status(400).json({
+                msg:"error",
+                error:"Profile Image not found"
+            })
+        }
+
+        user.avatar=file.filename
+        await user.save()
 
         return res.status(200).json({
-            msg:"Success"
+            msg:"Success",
+            user:user
         })
     }catch(err){
         console.log(err.message)

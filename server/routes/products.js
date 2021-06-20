@@ -1,8 +1,22 @@
 const express=require('express')
 const mongoose=require('mongoose')
+const path=require('path')
+const multer=require('multer')
 const auth=require('../auth/index')
 const Product=require('../models/products')
 const router=new express.Router()
+
+// SET STORAGE
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, path.join(__dirname,'../../public/images/productImages/'))
+    },
+    filename: function (req, file, cb) {
+      cb(null, 'avatar'+req.params.id+file.fieldname + '-' + Date.now()+'.png')
+    }
+  })
+   
+  var upload = multer({ storage: storage })
 
 
 router.get('/products',auth,async(req,res)=>{
@@ -108,9 +122,31 @@ router.post('/updateProduct',auth,async(req,res)=>{
     }
 })
 
-router.post('/updateProductImage',auth,async(req,res)=>{
+router.post('/updateProductImage/:id',upload.single('avatar'),auth,async(req,res)=>{
     try{
+        let productID=req.params.id
+        let product=await Product.findById({_id:mongoose.Types.ObjectId(productID)})
+        if(!product){
+            return res.status(400).json({
+                msg:"error",
+                error:'product not found'
+            })
+        }
+        const file = req.file
+        if (!file) {
+            return res.status(400).json({
+                msg:"error",
+                error:"Profile Image not found"
+            })
+        }
 
+        product.avatar=file.filename
+        await product.save()
+
+        return res.status(200).json({
+            msg:"Success",
+            product:product
+        })
     }catch(err){
         console.log(err.message)
         return res.status(400).json({

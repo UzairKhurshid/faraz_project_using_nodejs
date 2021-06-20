@@ -3,8 +3,11 @@ const mongoose=require('mongoose')
 const auth=require('../auth/index')
 const User=require('../models/user')
 const Product=require('../models/products')
+const Account=require('../models/account')
 const Stock=require('../models/stock')
 const History=require('../models/history')
+const Payment=require('../models/payment')
+
 const router=new express.Router()
 
 router.get('/stock',auth,async(req,res)=>{
@@ -92,8 +95,24 @@ router.post('/purchase',auth,async(req,res)=>{
             newStock.productID=req.body.productID
             newStock.quantity=req.body.quantity
             await newStock.save()   
+
+            let account=await Account.findOne()
+            let cash=req.body.cash
+            let debit=req.body.debit
+            account.amount=account.amount - cash
+            await account.save()
+
+            let vendor=await User.findById({_id:mongoose.Types.ObjectId(req.body.userID)})  
+            vendor.debit=vendor.debit + debit
+            await vendor.save()
+
+        
+            return res.status(200).json({
+                msg:"success",
+                history:history
+            })
         }
-        stock.quantiy=stock.quantiy + req.body.quantity
+        stock.quantity=stock.quantity + req.body.quantity
         await stock.save()
         
         //updating currentAmount
@@ -130,7 +149,7 @@ router.post('/sale',auth,async(req,res)=>{
 
         //updating stock
         let stock=await Stock.findOne({productID:req.body.productID})
-        stock.quantiy=stock.quantiy - req.body.quantity
+        stock.quantity=stock.quantity - req.body.quantity
         await stock.save()
         
         //updating currentAmount
@@ -173,6 +192,34 @@ router.get('/history',auth,async(req,res)=>{
         return res.status(200).json({
             msg:"success",
             history:history
+        })
+    }catch(err){
+        console.log(err.message)
+        return res.status(400).json({
+            msg:'error',
+            error:err.message
+        })
+    }
+})
+
+
+
+router.get('/historyPayments/:id',auth,async(req,res)=>{
+    try{
+        let historyID=req.params.id
+        let history=await History.findById({_id:mongoose.Types.ObjectId(historyID)}).populate('productID').populate('userID')
+        if(!history){
+            return res.status(200).json({
+                msg:"success",
+                history:null
+            })    
+        }
+        let payments=await Payment.find({historyID:historyID})
+
+        return res.status(200).json({
+            msg:"success",
+            history:history,
+            payments:payments
         })
     }catch(err){
         console.log(err.message)

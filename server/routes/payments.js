@@ -6,6 +6,8 @@ const Product=require('../models/products')
 const Stock=require('../models/stock')
 const History=require('../models/history')
 const Payment=require('../models/payment')
+const Account=require('../models/account')
+
 
 const router=new express.Router()
 
@@ -74,24 +76,57 @@ router.get('/payment/:id',auth,async(req,res)=>{
 
 
 
+//if payment type == customer it means customer is paying you and his debit will be minus
+//if payment type == vendor it meeans you are paying him
+
+// {
+//     "userID":"60cf04a34c5a1529947af108",
+//     "paymentType":"vendor",
+//     "historyID":"   60cf07fd8a1ee008c0fa03c3",
+//     "amount":20,
+//     "date":"18/06/2021"
+    
+// }
+
+
 router.post('/payment',auth,async(req,res)=>{
     try{
-        let payment=new Payment(req.body)
-        await payment.save()
+        let paymentType = req.body.paymentType
+        let historyID=req.body.historyID
+        if(paymentType == "customer"){
+                let payment=new Payment(req.body)
+                await payment.save()
+                let user=await User.findById({_id:mongoose.Types.ObjectId(req.body.userID)})
+                user.debit=user.debit - req.body.amount
+                await user.save()
+                let account=await Account.findOne()
+                account.amount=account.amount + req.body.amount
+                await account.save()
 
-
-        let user=await User.findById({_id:mongoose.Types.ObjectId(req.body.userID)})
-        if(user.role == "vendor"){
+                return res.status(200).json({
+                    msg:"success",
+                    payment:payment
+                })
+        }else if(paymentType == "vendor"){
+            let payment=new Payment(req.body)
+            await payment.save()
+            let user=await User.findById({_id:mongoose.Types.ObjectId(req.body.userID)})
             user.debit=user.debit - req.body.amount
-        }else if(user.role == "customer"){
-            user.debit=user.debit + req.body.amount
-        }
-        await user.save()
+            await user.save()
+            let account=await Account.findOne()
+            account.amount=account.amount - req.body.amount
+            await account.save()
 
-        return res.status(200).json({
-            msg:"success",
-            payment:payment
-        })
+            return res.status(200).json({
+                msg:"success",
+                payment:payment
+            })
+        }else{
+            return res.status(400).json({
+                msg:'error',
+                error:"invalid payment type"
+            })
+        }
     }catch(err){
         console.log(err.message)
         return res.status(400).json({
@@ -102,6 +137,24 @@ router.post('/payment',auth,async(req,res)=>{
 })
 
 
+
+router.post('/purchaseReturn',auth,async(req,res)=>{
+    try{
+        let historyID=req.body.historyID
+        let account=await Account.findOne()
+        let stock=await Stock.find()
+        let vendor=await Vendor.find()
+        
+        
+
+    }catch(err){
+        console.log(err.message)
+        return res.status(400).json({
+            msg:"error",
+            error:err.message
+        })
+    }
+})
 
 
 module.exports=router
