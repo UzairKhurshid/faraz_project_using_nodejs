@@ -45,7 +45,6 @@ router.post('/addStock',auth,async(req,res)=>{
     }
 })
 
-
 router.post('/updateStock',auth,async(req,res)=>{
     try{
         let stockID=req.body.stockID

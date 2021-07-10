@@ -12,7 +12,7 @@ var storage = multer.diskStorage({
       cb(null, path.join(__dirname,'../../public/images/userProfileImages/'))
     },
     filename: function (req, file, cb) {
-      cb(null, 'avatar'+req.userID+file.fieldname + '-' + Date.now()+'.png')
+      cb(null, 'avatar'+file.originalname + '-' + Date.now()+'.png')
     }
   })
    
